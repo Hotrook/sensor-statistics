@@ -8,6 +8,7 @@ object DirectoryScanner {
   def props(supervisor: ActorRef): Props = Props(new DirectoryScanner(supervisor))
 
   case class ScanDirectory(directoryPath: String)
+
   case class FileProcessorRegistered()
 
   case class FilesFound(numberOfFiles: Int)
@@ -33,7 +34,7 @@ class DirectoryScanner(supervisor: ActorRef) extends Actor with ActorLogging {
 
   private def scanDirectory(directoryPath: String): List[File] = {
     val directory = new File(directoryPath)
-    if(directory.exists() && directory.isDirectory){
+    if (directory.exists() && directory.isDirectory) {
       directory.listFiles((dir, name) => name.matches(""".+\.csv""")).toList
     } else {
       List()
