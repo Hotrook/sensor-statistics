@@ -4,8 +4,6 @@ import java.io.File
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 
-import scala.None
-
 object DirectoryScanner {
   def props(supervisor: ActorRef): Props = Props(new DirectoryScanner(supervisor))
 
@@ -35,14 +33,11 @@ class DirectoryScanner(supervisor: ActorRef) extends Actor with ActorLogging {
 
   private def scanDirectory(directoryPath: String): List[File] = {
     val directory = new File(directoryPath)
-    directory match {
-      case null => List()
-      case _ => directory.listFiles().filter(_.isFile).toList
+    if(directory.exists() && directory.isDirectory){
+      directory.listFiles((dir, name) => name.matches(""".+\.csv""")).toList
+    } else {
+      List()
     }
-//    if (directory == null)
-//      List()
-//    else
-//      directory.listFiles().filter(_.isFile).toList
   }
 
 

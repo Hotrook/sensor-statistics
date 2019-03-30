@@ -2,7 +2,6 @@ package com.hotrook.actors
 
 import akka.actor.ActorSystem
 import akka.testkit.{TestKit, TestProbe}
-import com.hotrook.actors.FileProcessor.FileLoaded
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 import scala.language.postfixOps
@@ -25,7 +24,7 @@ class DirectoryScannerSpec(_system: ActorSystem) extends TestKit(_system)
       val supervisor = TestProbe()
       val directoryScanner = system.actorOf(DirectoryScanner.props(supervisor.ref))
 
-      supervisor.send(directoryScanner, DirectoryScanner.ScanDirectory("src/test/resources/testDirectories/empty-dir"))
+      supervisor.send(directoryScanner, DirectoryScanner.ScanDirectory("src/test/resources/testDirectories/empty-dixcr"))
 
       supervisor.expectMsg(DirectoryScanner.FilesFound(0))
     }
