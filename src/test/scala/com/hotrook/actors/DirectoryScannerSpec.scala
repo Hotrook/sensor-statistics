@@ -2,6 +2,7 @@ package com.hotrook.actors
 
 import akka.actor.ActorSystem
 import akka.testkit.{TestKit, TestProbe}
+import com.hotrook.actors.FileProcessor.FileLoaded
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 import scala.language.postfixOps
@@ -10,7 +11,7 @@ import scala.language.postfixOps
 class DirectoryScannerSpec(_system: ActorSystem) extends TestKit(_system)
   with Matchers
   with WordSpecLike
-  with BeforeAndAfterAll{
+  with BeforeAndAfterAll {
 
   def this() = this(ActorSystem("DirectoryScannerSpec"))
 
@@ -37,9 +38,10 @@ class DirectoryScannerSpec(_system: ActorSystem) extends TestKit(_system)
 
       supervisor.expectMsg(DirectoryScanner.FilesFound(3))
 
-      supervisor.expectMsg(FileProcessor.FileLoaded("file1.csv"))
-      supervisor.expectMsg(FileProcessor.FileLoaded("file2.csv"))
-      supervisor.expectMsg(FileProcessor.FileLoaded("file3.csv"))
+      supervisor.expectMsgAllOf(
+        FileProcessor.FileLoaded("file1.csv"),
+        FileProcessor.FileLoaded("file2.csv"),
+        FileProcessor.FileLoaded("file3.csv"))
     }
   }
 }
