@@ -24,7 +24,7 @@ class SensorManager extends Actor with ActorLogging {
       }
     case SensorDataStreamer.FinishProcessing =>
       sensorIdToActor.foreach {
-        case (_, sensor) => sensor forward SensorDataStreamer.FinishProcessing
+        case (sensorId, sensor) => sensor forward SensorDataStreamer.FinishProcessing
       }
   }
 }

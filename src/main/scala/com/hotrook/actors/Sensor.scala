@@ -9,6 +9,7 @@ object Sensor {
   def props(sensorId: String): Props = Props(new Sensor(sensorId))
 
   case class SensorSummary(
+                            sensorId: String,
                             average: Option[Int],
                             minTemperature: Option[Int],
                             maxTemperature: Option[Int],
@@ -35,6 +36,7 @@ class Sensor(sensorId: String) extends Actor with ActorLogging {
   private def createSummaryMessage(state: State) = {
     val average = state.sum.map(_ / state.numberOfRequests)
     SensorSummary(
+      sensorId,
       average,
       state.minTemperature,
       state.maxTemperature,
