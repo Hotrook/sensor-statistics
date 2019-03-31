@@ -5,7 +5,7 @@ import java.io.File
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 
 object DirectoryScanner {
-  def props(supervisor: ActorRef): Props = Props(new DirectoryScanner(supervisor))
+  def props(sensorDataStreamer: ActorRef): Props = Props(new DirectoryScanner(sensorDataStreamer))
 
   case class ScanDirectory(directoryPath: String)
 
@@ -15,11 +15,11 @@ object DirectoryScanner {
 
 }
 
-class DirectoryScanner(supervisor: ActorRef) extends Actor with ActorLogging {
+class DirectoryScanner(sensorDataStreamer: ActorRef) extends Actor with ActorLogging {
 
   import DirectoryScanner._
 
-  override def receive = {
+  override def receive: Receive = {
     case ScanDirectory(directoryPath) =>
       log.info("Requested directory path to scan: {}", directoryPath)
       val files = scanDirectory(directoryPath)
@@ -27,7 +27,7 @@ class DirectoryScanner(supervisor: ActorRef) extends Actor with ActorLogging {
       sender() ! FilesFound(files.size)
 
       files.foreach(file => {
-        val deviceActor = context.actorOf(FileProcessor.props, s"FileScanner-${file.getName}")
+        val deviceActor = context.actorOf(FileProcessor.props(sender(), sensorDataStreamer), s"FileScanner-${file.getName}")
         deviceActor forward FileProcessor.LoadFile(file)
       })
   }
