@@ -25,7 +25,7 @@ class SensorManagerSpec extends TestKit(ActorSystem("SensorManagerSpec"))
       supervisor.expectMsgClass(Sensor.SensorSummary("sensorId1", None, None, None, 1, 0).getClass)
       val sender1 = supervisor.lastSender
 
-      supervisor.expectMsg(Sensor.SensorSummary("sensorId2", None, None, None, 1, 0).getClass)
+      supervisor.expectMsgClass(Sensor.SensorSummary("sensorId2", None, None, None, 1, 0).getClass)
       val sender2 = supervisor.lastSender
 
       sensorManager should not equal sender1
