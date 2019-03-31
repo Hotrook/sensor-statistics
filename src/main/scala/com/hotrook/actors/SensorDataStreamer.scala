@@ -28,7 +28,7 @@ class SensorDataStreamer(dataManager: ActorRef) extends Actor with ActorLogging 
       dataManager forward FinishProcessing
   }
 
-  def processLine(line: String) = {
+  private def processLine(line: String) = {
     val values = line.split(",")
     val sensorId = values(0)
     val temperature = Try(values(1).filterNot(_.isWhitespace).toInt).toOption

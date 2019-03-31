@@ -6,21 +6,20 @@ import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 import scala.language.postfixOps
 
-class SensorDataStreamerSpec(_system: ActorSystem) extends TestKit(_system)
+class SensorDataStreamerSpec() extends TestKit(ActorSystem("DirectoryScannerSpec"))
   with Matchers
   with WordSpecLike
   with BeforeAndAfterAll {
 
-  def this() = this(ActorSystem("DirectoryScannerSpec"))
+  val supervisor = TestProbe()
+  val dataManager = TestProbe()
 
   override def afterAll: Unit = {
-    shutdown(system)
+    TestKit.shutdownActorSystem(system)
   }
 
   "SensorDataStreamer" should {
     "forwards stop message to dataManager" in {
-      val supervisor = TestProbe()
-      val dataManager = TestProbe()
       val sensorDataStreamer = system.actorOf(SensorDataStreamer.props(dataManager.ref))
 
       supervisor.send(sensorDataStreamer, SensorDataStreamer.FinishProcessing)
@@ -29,43 +28,38 @@ class SensorDataStreamerSpec(_system: ActorSystem) extends TestKit(_system)
     }
 
     "correctly process valid line" in {
-      val supervisor = TestProbe()
-      val dataManager = TestProbe()
       val sensorId = "sensorId"
       val temperature = 100.toString
-      val line = sensorId + "," + temperature
-      val sensorDataStreamer = system.actorOf(SensorDataStreamer.props(dataManager.ref))
 
-      supervisor.send(sensorDataStreamer, SensorDataStreamer.ProcessLine(line))
-
-      dataManager.expectMsg(SensorDataStreamer.SensorData(sensorId, Some(100)))
+      testLineProcessing(sensorId, temperature, SensorDataStreamer.SensorData(sensorId, Some(100)))
     }
 
     "correctly process line with white characters" in {
-      val supervisor = TestProbe()
-      val dataManager = TestProbe()
       val sensorId = "sensor Id"
-      val temperature = 100.toString
-      val line = sensorId + ", " + temperature + " "
-      val sensorDataStreamer = system.actorOf(SensorDataStreamer.props(dataManager.ref))
+      val temperature = " " + 100.toString + " "
 
-      supervisor.send(sensorDataStreamer, SensorDataStreamer.ProcessLine(line))
-
-      dataManager.expectMsg(SensorDataStreamer.SensorData(sensorId, Some(100)))
+      testLineProcessing(sensorId, temperature, SensorDataStreamer.SensorData(sensorId, Some(100)))
     }
 
     "correctly process line with NaN" in {
-      val supervisor = TestProbe()
-      val dataManager = TestProbe()
       val sensorId = "sensorId"
       val temperature = "NaN"
-      val line = sensorId + "," + temperature
-      val sensorDataStreamer = system.actorOf(SensorDataStreamer.props(dataManager.ref))
 
-      supervisor.send(sensorDataStreamer, SensorDataStreamer.ProcessLine(line))
-
-      dataManager.expectMsg(SensorDataStreamer.SensorData(sensorId, None))
+      testLineProcessing(sensorId, temperature, SensorDataStreamer.SensorData(sensorId, None))
     }
+  }
+
+  private def testLineProcessing(sensorId: String, temperature: String, expectedResult: SensorDataStreamer.SensorData) = {
+    val line = createLine(sensorId, temperature)
+    val sensorDataStreamer = system.actorOf(SensorDataStreamer.props(dataManager.ref))
+
+    supervisor.send(sensorDataStreamer, SensorDataStreamer.ProcessLine(line))
+
+    dataManager.expectMsg(expectedResult)
+  }
+
+  private def createLine(sensorId: String, temperature: String) = {
+    sensorId + "," + temperature
   }
 
 }

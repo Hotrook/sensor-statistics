@@ -7,15 +7,13 @@ import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 import scala.language.postfixOps
 
 
-class DirectoryScannerSpec(_system: ActorSystem) extends TestKit(_system)
+class DirectoryScannerSpec() extends TestKit(ActorSystem("DirectoryScannerSpec"))
   with Matchers
   with WordSpecLike
   with BeforeAndAfterAll {
 
-  def this() = this(ActorSystem("DirectoryScannerSpec"))
-
   override def afterAll: Unit = {
-    shutdown(system)
+    TestKit.shutdownActorSystem(system)
   }
 
   "DirectoryScanner should" should {
