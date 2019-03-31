@@ -22,10 +22,10 @@ class SensorManagerSpec extends TestKit(ActorSystem("SensorManagerSpec"))
 
       supervisor.send(sensorManager, SensorDataStreamer.FinishProcessing)
 
-      supervisor.expectMsg(Sensor.SensorSummary(None, None, None, 1, 0))
+      supervisor.expectMsgClass(Sensor.SensorSummary("sensorId1", None, None, None, 1, 0).getClass)
       val sender1 = supervisor.lastSender
 
-      supervisor.expectMsg(Sensor.SensorSummary(None, None, None, 1, 0))
+      supervisor.expectMsgClass(Sensor.SensorSummary("sensorId2", None, None, None, 1, 0).getClass)
       val sender2 = supervisor.lastSender
 
       sensorManager should not equal sender1
@@ -42,7 +42,7 @@ class SensorManagerSpec extends TestKit(ActorSystem("SensorManagerSpec"))
 
       supervisor.send(sensorManager, SensorDataStreamer.FinishProcessing)
 
-      supervisor.expectMsg(Sensor.SensorSummary(Some(1), Some(2), Some(2), 2, 1))
+      supervisor.expectMsg(Sensor.SensorSummary(sensorId, Some(1), Some(2), Some(2), 2, 1))
 
       val sender = supervisor.lastSender
 
