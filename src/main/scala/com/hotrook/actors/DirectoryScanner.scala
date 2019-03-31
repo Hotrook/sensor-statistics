@@ -35,7 +35,7 @@ class DirectoryScanner(supervisor: ActorRef) extends Actor with ActorLogging {
   private def scanDirectory(directoryPath: String): List[File] = {
     val directory = new File(directoryPath)
     if (directory.exists() && directory.isDirectory) {
-      directory.listFiles((dir, name) => name.matches(""".+\.csv""")).toList
+      directory.listFiles((_, name) => name.matches(""".+\.csv""")).toList
     } else {
       List()
     }
