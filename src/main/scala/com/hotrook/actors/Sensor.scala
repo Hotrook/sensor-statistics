@@ -22,35 +22,47 @@ class Sensor(sensorId: String) extends Actor with ActorLogging {
 
   import Sensor._
 
-  var sum: Option[Int] = None
-  var minTemperature: Option[Int] = None
-  var maxTemperature: Option[Int] = None
-  var numberOfRequests = 0
-  var successfulRequests = 0
+  override def receive: Receive = waitingForMeasurements(SensorState(None, None, None, 0, 0))
 
-  override def receive = {
+  def waitingForMeasurements(state: SensorState): Receive = {
     case SensorDataStreamer.SensorData(`sensorId`, temperature) =>
-      saveRecord(temperature)
+      saveRecord(temperature, state)
     case FinishProcessing =>
-      sender ! createSummaryMessage()
+      sender ! createSummaryMessage(state)
       context stop self
   }
 
-  private def createSummaryMessage() = {
-    val average = sum.map(_ / numberOfRequests)
-    SensorSummary(average, minTemperature, maxTemperature, numberOfRequests, successfulRequests)
+  private def createSummaryMessage(state: SensorState) = {
+    val average = state.sum.map(_ / state.numberOfRequests)
+    SensorSummary(
+      average,
+      state.minTemperature,
+      state.maxTemperature,
+      state.numberOfRequests,
+      state.successfulRequests
+    )
   }
 
-  private def saveRecord(temperature: Option[Int]): Unit = {
-    successfulRequests += temperature.map(_ => 1).getOrElse(0)
-    numberOfRequests += 1
-    sum = calculateNewValue(sum, temperature, _ + _)
-    minTemperature = calculateNewValue(minTemperature, temperature, min)
-    maxTemperature = calculateNewValue(maxTemperature, temperature, max)
+  private def saveRecord(temperature: Option[Int], oldState: SensorState): Unit = {
+    context.become(waitingForMeasurements(SensorState(
+      calculateNewValue(oldState.sum, temperature, _ + _),
+      calculateNewValue(oldState.minTemperature, temperature, min),
+      calculateNewValue(oldState.maxTemperature, temperature, max),
+      oldState.numberOfRequests + 1,
+      oldState.successfulRequests + temperature.map(_ => 1).getOrElse(0)
+    )))
   }
 
   private def calculateNewValue(oldValue: Option[Int], newValue: Option[Int], reducer: (Int, Int) => Int): Option[Int] = {
     (oldValue ++ newValue).reduceOption(reducer)
   }
+
+  private case class SensorState(
+                                  sum: Option[Int],
+                                  minTemperature: Option[Int],
+                                  maxTemperature: Option[Int],
+                                  numberOfRequests: Int,
+                                  successfulRequests: Int
+                                )
 
 }
