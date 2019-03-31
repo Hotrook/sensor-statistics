@@ -31,7 +31,7 @@ class SensorQuery(
   val queryTimeoutTimer = context.system.scheduler.scheduleOnce(timeout, self, SensorQuery.CollectionTimeout)
 
   override def preStart(): Unit = {
-    sensorIdToActor.valuesIterator.foreach { sensor ⇒
+    sensorIdToActor.valuesIterator.foreach { sensor =>
       context.watch(sensor)
       sensor ! SensorDataStreamer.FinishProcessing(requester)
     }
@@ -50,7 +50,7 @@ class SensorQuery(
       requester ! trackMsg
       receivedResponse(sensor, stillWaiting)
 
-    case SensorQuery.CollectionTimeout ⇒
+    case SensorQuery.CollectionTimeout =>
       requester ! ResultsCollector.AllCollected
       context.stop(self)
   }
