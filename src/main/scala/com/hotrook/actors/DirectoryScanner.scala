@@ -15,7 +15,7 @@ object DirectoryScanner {
 
 }
 
-class llDirectoryScanner(sensorDataStreamer: ActorRef) extends Actor with ActorLogging {
+class DirectoryScanner(sensorDataStreamer: ActorRef) extends Actor with ActorLogging {
 
   import DirectoryScanner._
 
