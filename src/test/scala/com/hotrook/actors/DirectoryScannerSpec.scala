@@ -29,16 +29,25 @@ class DirectoryScannerSpec() extends TestKit(ActorSystem("DirectoryScannerSpec")
 
     "create 3 FileProcessors" in {
       val supervisor = TestProbe()
-      val directoryScanner = system.actorOf(DirectoryScanner.props(supervisor.ref))
+      val sensorDataStreamer = TestProbe()
+
+      val directoryScanner = system.actorOf(DirectoryScanner.props(sensorDataStreamer.ref))
 
       supervisor.send(directoryScanner, DirectoryScanner.ScanDirectory("src/test/resources/testDirectories/3-files-dir"))
-
       supervisor.expectMsg(DirectoryScanner.FilesFound(3))
+
+      val message1 = sensorDataStreamer.expectMsgClass(FileProcessor.EndOfFile("file.csv").getClass)
+      sensorDataStreamer.send(sensorDataStreamer.lastSender, message1)
+      val message2 = sensorDataStreamer.expectMsgClass(FileProcessor.EndOfFile("file.csv").getClass)
+      sensorDataStreamer.send(sensorDataStreamer.lastSender, message2)
+      val message3 = sensorDataStreamer.expectMsgClass(FileProcessor.EndOfFile("file.csv").getClass)
+      sensorDataStreamer.send(sensorDataStreamer.lastSender, message3)
 
       supervisor.expectMsgAllOf(
         FileProcessor.FileLoaded("file1.csv"),
         FileProcessor.FileLoaded("file2.csv"),
-        FileProcessor.FileLoaded("file3.csv"))
+        FileProcessor.FileLoaded("file3.csv")
+      )
     }
   }
 }
