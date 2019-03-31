@@ -30,38 +30,36 @@ class SensorDataStreamerSpec() extends TestKit(ActorSystem("DirectoryScannerSpec
     "correctly process valid line" in {
       val sensorId = "sensorId"
       val temperature = 100.toString
-      val line = createLine(sensorId, temperature)
-      val sensorDataStreamer = system.actorOf(SensorDataStreamer.props(dataManager.ref))
 
-      supervisor.send(sensorDataStreamer, SensorDataStreamer.ProcessLine(line))
-
-      dataManager.expectMsg(SensorDataStreamer.SensorData(sensorId, Some(100)))
+      testLineProcessing(sensorId, temperature, SensorDataStreamer.SensorData(sensorId, Some(100)))
     }
 
     "correctly process line with white characters" in {
       val sensorId = "sensor Id"
       val temperature = " " + 100.toString + " "
-      val line = createLine(sensorId, temperature)
-      val sensorDataStreamer = system.actorOf(SensorDataStreamer.props(dataManager.ref))
 
-      supervisor.send(sensorDataStreamer, SensorDataStreamer.ProcessLine(line))
-
-      dataManager.expectMsg(SensorDataStreamer.SensorData(sensorId, Some(100)))
+      testLineProcessing(sensorId, temperature, SensorDataStreamer.SensorData(sensorId, Some(100)))
     }
 
     "correctly process line with NaN" in {
       val sensorId = "sensorId"
       val temperature = "NaN"
-      val line = createLine(sensorId, temperature)
-      val sensorDataStreamer = system.actorOf(SensorDataStreamer.props(dataManager.ref))
 
-      supervisor.send(sensorDataStreamer, SensorDataStreamer.ProcessLine(line))
-
-      dataManager.expectMsg(SensorDataStreamer.SensorData(sensorId, None))
+      testLineProcessing(sensorId, temperature, SensorDataStreamer.SensorData(sensorId, None))
     }
+  }
+
+  private def testLineProcessing(sensorId: String, temperature: String, expectedResult: SensorDataStreamer.SensorData) = {
+    val line = createLine(sensorId, temperature)
+    val sensorDataStreamer = system.actorOf(SensorDataStreamer.props(dataManager.ref))
+
+    supervisor.send(sensorDataStreamer, SensorDataStreamer.ProcessLine(line))
+
+    dataManager.expectMsg(expectedResult)
   }
 
   private def createLine(sensorId: String, temperature: String) = {
     sensorId + "," + temperature
   }
+
 }
