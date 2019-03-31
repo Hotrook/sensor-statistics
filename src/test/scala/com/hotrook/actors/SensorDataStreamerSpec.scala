@@ -22,9 +22,9 @@ class SensorDataStreamerSpec() extends TestKit(ActorSystem("DirectoryScannerSpec
     "forwards stop message to dataManager" in {
       val sensorDataStreamer = system.actorOf(SensorDataStreamer.props(dataManager.ref))
 
-      supervisor.send(sensorDataStreamer, SensorDataStreamer.FinishProcessing)
+      supervisor.send(sensorDataStreamer, SensorDataStreamer.FinishProcessing(supervisor.ref))
 
-      dataManager.expectMsg(SensorDataStreamer.FinishProcessing)
+      dataManager.expectMsg(SensorDataStreamer.FinishProcessing(supervisor.ref))
     }
 
     "correctly process valid line" in {
