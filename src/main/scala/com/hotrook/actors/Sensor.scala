@@ -22,9 +22,9 @@ class Sensor(sensorId: String) extends Actor with ActorLogging {
 
   import Sensor._
 
-  override def receive: Receive = waitingForMeasurements(SensorState(None, None, None, 0, 0))
+  override def receive: Receive = waitingForMeasurements(State(None, None, None, 0, 0))
 
-  def waitingForMeasurements(state: SensorState): Receive = {
+  private def waitingForMeasurements(state: State): Receive = {
     case SensorDataStreamer.SensorData(`sensorId`, temperature) =>
       saveRecord(temperature, state)
     case FinishProcessing =>
@@ -32,7 +32,7 @@ class Sensor(sensorId: String) extends Actor with ActorLogging {
       context stop self
   }
 
-  private def createSummaryMessage(state: SensorState) = {
+  private def createSummaryMessage(state: State) = {
     val average = state.sum.map(_ / state.numberOfRequests)
     SensorSummary(
       average,
@@ -43,8 +43,8 @@ class Sensor(sensorId: String) extends Actor with ActorLogging {
     )
   }
 
-  private def saveRecord(temperature: Option[Int], oldState: SensorState): Unit = {
-    context.become(waitingForMeasurements(SensorState(
+  private def saveRecord(temperature: Option[Int], oldState: State): Unit = {
+    context.become(waitingForMeasurements(State(
       calculateNewValue(oldState.sum, temperature, _ + _),
       calculateNewValue(oldState.minTemperature, temperature, min),
       calculateNewValue(oldState.maxTemperature, temperature, max),
@@ -57,12 +57,12 @@ class Sensor(sensorId: String) extends Actor with ActorLogging {
     (oldValue ++ newValue).reduceOption(reducer)
   }
 
-  private case class SensorState(
-                                  sum: Option[Int],
-                                  minTemperature: Option[Int],
-                                  maxTemperature: Option[Int],
-                                  numberOfRequests: Int,
-                                  successfulRequests: Int
-                                )
+  private case class State(
+                            sum: Option[Int],
+                            minTemperature: Option[Int],
+                            maxTemperature: Option[Int],
+                            numberOfRequests: Int,
+                            successfulRequests: Int
+                          )
 
 }
