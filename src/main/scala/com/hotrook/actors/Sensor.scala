@@ -11,7 +11,7 @@ object Sensor {
   case class SensorSummary(
                             average: Option[Int],
                             minTemperature: Option[Int],
-                            mxaTemperature: Option[Int],
+                            maxTemperature: Option[Int],
                             numberOfRequests: Int,
                             successfulRequests: Int
                           )
