@@ -34,7 +34,7 @@ class PrintManagerSpec() extends TestKit(ActorSystem("PrintManagerSpec"))
       supervisor.send(printManager, PrintManager.UnsuccessfulMeasurements(1000))
       printer.expectMsg(Printer.Print("Num of failed measurements: 1000"))
 
-      supervisor.send(printManager, PrintManager.PrintResult)
+      supervisor.send(printManager, PrintManager.PrintResults)
       printer.expectMsg(Printer.Print("Sensors with highest avg humidity:"))
       printer.expectMsg(Printer.Print("sensor-id,min,avg,max"))
 

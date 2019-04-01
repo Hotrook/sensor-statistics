@@ -33,7 +33,7 @@ class PrintManager(printer: ActorRef) extends Actor with ActorLogging {
     case PrintManager.UnsuccessfulMeasurements(number) =>
       printer ! Printer.Print(s"Num of failed measurements: ${number}")
 
-    case PrintManager.PrintResult =>
+    case PrintManager.PrintResults =>
       printer ! Printer.Print("Sensors with highest avg humidity:")
       printer ! Printer.Print("sensor-id,min,avg,max")
 
