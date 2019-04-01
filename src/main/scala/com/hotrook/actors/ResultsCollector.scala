@@ -29,7 +29,7 @@ class ResultsCollector(printer: ActorRef, supervisor: ActorRef) extends Actor wi
       makeReport()
 
     case Terminated(`printer`) =>
-      supervisor ! ResultsCollector.EndOfData
+      supervisor ! SensorStatisticsSupervisor.Stop
       context stop self
   }
 
