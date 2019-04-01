@@ -64,3 +64,8 @@ Go to main directory of this project and type:
 sbt run
 ```
 That's all! It while take a while to compile the project and you will have your sensor statistics in Standard Output.
+
+## Improvement ideas
+* adding some library for streaming data with `back-pressure` feature
+* rethink communication to adjust it to `let it crash` approach
+* use types bigger than `Int` to store temperature
