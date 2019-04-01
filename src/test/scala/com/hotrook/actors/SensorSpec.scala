@@ -26,7 +26,7 @@ class SensorSpec() extends TestKit(ActorSystem("DirectoryScannerSpec"))
       supervisor.send(sensor, SensorDataStreamer.SensorData(sensorId, None))
       supervisor.send(sensor, SensorDataStreamer.SensorData(sensorId, None))
       supervisor.send(sensor, SensorDataStreamer.SensorData(sensorId, None))
-      supervisor.send(sensor, SensorDataStreamer.FinishProcessing)
+      supervisor.send(sensor, SensorDataStreamer.FinishProcessing(supervisor.ref))
 
       supervisor.expectMsg(Sensor.SensorSummary(sensorId, None, None, None, 3, 0))
     }
@@ -35,7 +35,7 @@ class SensorSpec() extends TestKit(ActorSystem("DirectoryScannerSpec"))
       val sensor = system.actorOf(Sensor.props(sensorId))
 
       supervisor.send(sensor, SensorDataStreamer.SensorData("randomId", None))
-      supervisor.send(sensor, SensorDataStreamer.FinishProcessing)
+      supervisor.send(sensor, SensorDataStreamer.FinishProcessing(supervisor.ref))
 
       supervisor.expectMsg(Sensor.SensorSummary(sensorId, None, None, None, 0, 0))
     }
@@ -46,7 +46,7 @@ class SensorSpec() extends TestKit(ActorSystem("DirectoryScannerSpec"))
       supervisor.send(sensor, SensorDataStreamer.SensorData(sensorId, Some(1)))
       supervisor.send(sensor, SensorDataStreamer.SensorData(sensorId, Some(2)))
       supervisor.send(sensor, SensorDataStreamer.SensorData(sensorId, Some(3)))
-      supervisor.send(sensor, SensorDataStreamer.FinishProcessing)
+      supervisor.send(sensor, SensorDataStreamer.FinishProcessing(supervisor.ref))
 
       supervisor.expectMsg(Sensor.SensorSummary(sensorId, Some(2), Some(1), Some(3), 3, 3))
     }
@@ -56,7 +56,7 @@ class SensorSpec() extends TestKit(ActorSystem("DirectoryScannerSpec"))
 
       supervisor.send(sensor, SensorDataStreamer.SensorData(sensorId, None))
       supervisor.send(sensor, SensorDataStreamer.SensorData(sensorId, Some(2)))
-      supervisor.send(sensor, SensorDataStreamer.FinishProcessing)
+      supervisor.send(sensor, SensorDataStreamer.FinishProcessing(supervisor.ref))
 
       supervisor.expectMsg(Sensor.SensorSummary(sensorId, Some(1), Some(2), Some(2), 2, 1))
     }

@@ -12,7 +12,7 @@ object SensorDataStreamer {
 
   case class SensorData(sensorId: String, temperature: Option[Int])
 
-  case object FinishProcessing
+  case class FinishProcessing(resultsCollector: ActorRef)
 
 }
 
@@ -24,8 +24,8 @@ class SensorDataStreamer(dataManager: ActorRef) extends Actor with ActorLogging 
     case ProcessLine(line) =>
       val sensorData = processLine(line)
       dataManager ! sensorData
-    case FinishProcessing =>
-      dataManager forward FinishProcessing
+    case trackMsg@FinishProcessing(_) =>
+      dataManager forward trackMsg
   }
 
   private def processLine(line: String) = {

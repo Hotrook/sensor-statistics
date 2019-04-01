@@ -20,7 +20,7 @@ class SensorManagerSpec extends TestKit(ActorSystem("SensorManagerSpec"))
       supervisor.send(sensorManager, SensorDataStreamer.SensorData("sensorId1", None))
       supervisor.send(sensorManager, SensorDataStreamer.SensorData("sensorId2", None))
 
-      supervisor.send(sensorManager, SensorDataStreamer.FinishProcessing)
+      supervisor.send(sensorManager, SensorDataStreamer.FinishProcessing(supervisor.ref))
 
       supervisor.expectMsgClass(Sensor.SensorSummary("sensorId1", None, None, None, 1, 0).getClass)
       val sender1 = supervisor.lastSender
@@ -40,7 +40,7 @@ class SensorManagerSpec extends TestKit(ActorSystem("SensorManagerSpec"))
       supervisor.send(sensorManager, SensorDataStreamer.SensorData(sensorId, Some(2)))
       supervisor.send(sensorManager, SensorDataStreamer.SensorData(sensorId, None))
 
-      supervisor.send(sensorManager, SensorDataStreamer.FinishProcessing)
+      supervisor.send(sensorManager, SensorDataStreamer.FinishProcessing(supervisor.ref))
 
       supervisor.expectMsg(Sensor.SensorSummary(sensorId, Some(1), Some(2), Some(2), 2, 1))
 

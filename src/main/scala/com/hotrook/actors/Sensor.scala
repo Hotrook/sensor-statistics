@@ -28,7 +28,7 @@ class Sensor(sensorId: String) extends Actor with ActorLogging {
   private def waitingForMeasurements(state: State): Receive = {
     case SensorDataStreamer.SensorData(`sensorId`, temperature) =>
       saveRecord(temperature, state)
-    case FinishProcessing =>
+    case FinishProcessing(_) =>
       sender ! createSummaryMessage(state)
       context stop self
   }
