@@ -1,7 +1,8 @@
 package com.hotrook.actors.printing
 
-import akka.actor.ActorSystem
+import akka.actor.{ActorSystem, PoisonPill}
 import akka.testkit.{TestKit, TestProbe}
+import com.hotrook.actors.ResultsCollector
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 
@@ -40,19 +41,17 @@ class PrintManagerSpec() extends TestKit(ActorSystem("PrintManagerSpec"))
       supervisor.send(printManager, PrintManager.PrintResult("sensor1", Some(1), None, Some(414)))
       printer.expectMsg(Printer.Print("sensor1,1,414,NaN"))
     }
+
+    "stop itself when EndOfData message is sent" in {
+      val printer = TestProbe()
+      val printManager = system.actorOf(PrintManager.props(printer.ref))
+
+      supervisor.watch(printManager)
+      supervisor.send(printManager, ResultsCollector.EndOfData)
+      printer.expectMsg(ResultsCollector.EndOfData)
+      printer.ref ! PoisonPill
+      supervisor.expectTerminated(printManager)
+    }
   }
 
 }
-
-/*
-Num of processed files: 2
-Num of processed measurements: 7
-Num of failed measurements: 2
-
-Sensors with highest avg humidity:
-
-sensor-id,min,avg,max
-s2,78,82,88
-s1,10,54,98
-s3,NaN,NaN,NaN
- */

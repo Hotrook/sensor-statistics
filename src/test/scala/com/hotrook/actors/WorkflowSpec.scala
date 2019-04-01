@@ -66,11 +66,11 @@ class WorkflowSpec() extends TestKit(ActorSystem("WorkflowSpec"))
 
     "work with DirectoryScanner, FileProcessors, SensorDataStreamer, SensorManager and ResultCollector" in {
       val printer = TestProbe()
+      val supervisor = TestProbe()
       val sensorManager = system.actorOf(SensorManager.props)
-      val resultCollector = system.actorOf(ResultsCollector.props(printer.ref))
+      val resultCollector = system.actorOf(ResultsCollector.props(printer.ref, supervisor.ref))
       val sensorDataStreamer = system.actorOf(SensorDataStreamer.props(sensorManager))
       val directoryScanner = system.actorOf(DirectoryScanner.props(sensorDataStreamer))
-      val supervisor = TestProbe()
 
       supervisor.send(directoryScanner, DirectoryScanner.ScanDirectory(directory))
 
@@ -84,6 +84,7 @@ class WorkflowSpec() extends TestKit(ActorSystem("WorkflowSpec"))
       printer.expectMsg(PrintManager.PrintResult("s3", Some(8), Some(9), Some(10)))
       printer.expectMsg(PrintManager.PrintResult("s1", Some(2), Some(7), Some(12)))
       printer.expectMsg(PrintManager.PrintResult("s2", Some(4), Some(5), Some(6)))
+      printer.expectMsg(ResultsCollector.EndOfData)
     }
   }
 

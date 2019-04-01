@@ -23,7 +23,7 @@ class ResultsCollectorSpec() extends TestKit(ActorSystem("ResultsCollectorSpec")
   "ResultsCollector" should {
     "sort summaries from biggest average temperature" in {
       val printer = TestProbe()
-      val resultsCollector = system.actorOf(ResultsCollector.props(printer.ref))
+      val resultsCollector = system.actorOf(ResultsCollector.props(printer.ref, supervisor.ref))
 
       supervisor.send(resultsCollector, Sensor.SensorSummary("s4", Some(1), Some(0), Some(2), 5, 4))
       supervisor.send(resultsCollector, Sensor.SensorSummary("s1", Some(4), Some(3), Some(5), 5, 4))
@@ -40,17 +40,20 @@ class ResultsCollectorSpec() extends TestKit(ActorSystem("ResultsCollectorSpec")
       printer.expectMsg(PrintManager.PrintResult("s3", Some(1), Some(2), Some(3)))
       printer.expectMsg(PrintManager.PrintResult("s4", Some(0), Some(1), Some(2)))
       printer.expectMsg(PrintManager.PrintResult("s5", None, None, None))
+      printer.expectMsg(ResultsCollector.EndOfData)
     }
 
     "not crash if 0 summaries submitted" in {
       val printer = TestProbe()
-      val resultsCollector = system.actorOf(ResultsCollector.props(printer.ref))
+      val resultsCollector = system.actorOf(ResultsCollector.props(printer.ref, supervisor.ref))
 
       supervisor.send(resultsCollector, ResultsCollector.AllCollected)
 
       printer.expectMsg(PrintManager.ProcessedMeasurements(0))
       printer.expectMsg(PrintManager.UnsuccessfulMeasurements(0))
       printer.expectMsg(PrintManager.PrintResults)
+      printer.expectMsg(ResultsCollector.EndOfData)
+
       printer.expectNoMessage(1 second)
     }
   }

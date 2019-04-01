@@ -1,6 +1,7 @@
 package com.hotrook.actors.printing
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props, Terminated}
+import com.hotrook.actors.ResultsCollector
 
 object PrintManager {
   def props(printer: ActorRef): Props = Props(new PrintManager(printer))
@@ -42,5 +43,11 @@ class PrintManager(printer: ActorRef) extends Actor with ActorLogging {
       val averageToPrint = average.map(_.toString).getOrElse("NaN")
       printer ! Printer.Print(s"${sensorId},${maxToPrint},${minToPrint},${averageToPrint}")
 
+    case msg@ResultsCollector.EndOfData =>
+      context watch printer
+      printer ! msg
+
+    case Terminated(`printer`) =>
+      context stop self
   }
 }
