@@ -1,6 +1,7 @@
 package com.hotrook.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import com.hotrook.actors.printing.PrintManager
 
 import scala.collection.mutable
 import scala.math.Ordered.orderingToOrdered
@@ -27,17 +28,17 @@ class ResultsCollector(printer: ActorRef) extends Actor with ActorLogging {
 
   private def makeReport() = {
     val processedMeasurements = results.foldLeft(0)(_ + _.numberOfRequests)
-    printer ! Printer.ProcessedMeasurements(processedMeasurements)
+    printer ! PrintManager.ProcessedMeasurements(processedMeasurements)
 
     val successfulMeasurements = results.foldLeft(0)(_ + _.successfulRequests)
     val unsuccessfulMeasurements = processedMeasurements - successfulMeasurements
-    printer ! Printer.UnsuccessfulMeasurements(unsuccessfulMeasurements)
+    printer ! PrintManager.UnsuccessfulMeasurements(unsuccessfulMeasurements)
 
-    printer ! Printer.PrintResults
+    printer ! PrintManager.PrintResults
 
     val sortedResults = results.toSeq.sortWith(_.average > _.average)
     sortedResults.foreach { x =>
-      printer ! Printer.PrintResult(x.sensorId, x.minTemperature, x.average, x.maxTemperature)
+      printer ! PrintManager.PrintResult(x.sensorId, x.minTemperature, x.average, x.maxTemperature)
     }
   }
 

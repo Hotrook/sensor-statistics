@@ -2,6 +2,7 @@ package com.hotrook.actors
 
 import akka.actor.ActorSystem
 import akka.testkit.{TestKit, TestProbe}
+import com.hotrook.actors.printing.PrintManager
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 import scala.concurrent.duration._
@@ -31,14 +32,14 @@ class ResultsCollectorSpec() extends TestKit(ActorSystem("ResultsCollectorSpec")
       supervisor.send(resultsCollector, Sensor.SensorSummary("s2", Some(3), Some(2), Some(4), 5, 4))
       supervisor.send(resultsCollector, ResultsCollector.AllCollected)
 
-      printer.expectMsg(Printer.ProcessedMeasurements(25))
-      printer.expectMsg(Printer.UnsuccessfulMeasurements(9))
-      printer.expectMsg(Printer.PrintResults)
-      printer.expectMsg(Printer.PrintResult("s1", Some(3), Some(4), Some(5)))
-      printer.expectMsg(Printer.PrintResult("s2", Some(2), Some(3), Some(4)))
-      printer.expectMsg(Printer.PrintResult("s3", Some(1), Some(2), Some(3)))
-      printer.expectMsg(Printer.PrintResult("s4", Some(0), Some(1), Some(2)))
-      printer.expectMsg(Printer.PrintResult("s5", None, None, None))
+      printer.expectMsg(PrintManager.ProcessedMeasurements(25))
+      printer.expectMsg(PrintManager.UnsuccessfulMeasurements(9))
+      printer.expectMsg(PrintManager.PrintResults)
+      printer.expectMsg(PrintManager.PrintResult("s1", Some(3), Some(4), Some(5)))
+      printer.expectMsg(PrintManager.PrintResult("s2", Some(2), Some(3), Some(4)))
+      printer.expectMsg(PrintManager.PrintResult("s3", Some(1), Some(2), Some(3)))
+      printer.expectMsg(PrintManager.PrintResult("s4", Some(0), Some(1), Some(2)))
+      printer.expectMsg(PrintManager.PrintResult("s5", None, None, None))
     }
 
     "not crash if 0 summaries submitted" in {
@@ -47,9 +48,9 @@ class ResultsCollectorSpec() extends TestKit(ActorSystem("ResultsCollectorSpec")
 
       supervisor.send(resultsCollector, ResultsCollector.AllCollected)
 
-      printer.expectMsg(Printer.ProcessedMeasurements(0))
-      printer.expectMsg(Printer.UnsuccessfulMeasurements(0))
-      printer.expectMsg(Printer.PrintResults)
+      printer.expectMsg(PrintManager.ProcessedMeasurements(0))
+      printer.expectMsg(PrintManager.UnsuccessfulMeasurements(0))
+      printer.expectMsg(PrintManager.PrintResults)
       printer.expectNoMessage(1 second)
     }
   }
