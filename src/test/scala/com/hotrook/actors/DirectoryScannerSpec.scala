@@ -25,6 +25,7 @@ class DirectoryScannerSpec() extends TestKit(ActorSystem("DirectoryScannerSpec")
       supervisor.send(directoryScanner, DirectoryScanner.ScanDirectory("src/test/resources/testDirectories/empty-dixcr"))
 
       supervisor.expectMsg(DirectoryScanner.FilesFound(0))
+      supervisor.expectMsg(DirectoryScanner.FilesLoaded(0))
     }
 
     "create 3 FileProcessors" in {
@@ -38,16 +39,14 @@ class DirectoryScannerSpec() extends TestKit(ActorSystem("DirectoryScannerSpec")
 
       val message1 = sensorDataStreamer.expectMsgClass(FileProcessor.EndOfFile("file.csv").getClass)
       sensorDataStreamer.send(sensorDataStreamer.lastSender, message1)
+
       val message2 = sensorDataStreamer.expectMsgClass(FileProcessor.EndOfFile("file.csv").getClass)
       sensorDataStreamer.send(sensorDataStreamer.lastSender, message2)
+
       val message3 = sensorDataStreamer.expectMsgClass(FileProcessor.EndOfFile("file.csv").getClass)
       sensorDataStreamer.send(sensorDataStreamer.lastSender, message3)
 
-      supervisor.expectMsgAllOf(
-        FileProcessor.FileLoaded("file1.csv"),
-        FileProcessor.FileLoaded("file2.csv"),
-        FileProcessor.FileLoaded("file3.csv")
-      )
+      supervisor.expectMsg(DirectoryScanner.FilesLoaded(3))
     }
   }
 }
