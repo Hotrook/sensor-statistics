@@ -6,7 +6,7 @@ import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 import scala.language.postfixOps
 
-class SensorSpec() extends TestKit(ActorSystem("DirectoryScannerSpec"))
+class SensorSpec() extends TestKit(ActorSystem("SensorSpec"))
   with Matchers
   with WordSpecLike
   with BeforeAndAfterAll {

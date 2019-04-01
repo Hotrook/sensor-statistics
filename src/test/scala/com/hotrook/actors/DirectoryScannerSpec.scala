@@ -22,7 +22,7 @@ class DirectoryScannerSpec() extends TestKit(ActorSystem("DirectoryScannerSpec")
       val supervisor = TestProbe()
       val directoryScanner = system.actorOf(DirectoryScanner.props(supervisor.ref))
 
-      supervisor.send(directoryScanner, DirectoryScanner.ScanDirectory("src/test/resources/testDirectories/empty-dixcr"))
+      supervisor.send(directoryScanner, DirectoryScanner.ScanDirectory("src/test/resources/testDirectories/empty-dir-or-non-existing"))
 
       supervisor.expectMsg(DirectoryScanner.FilesFound(0))
       supervisor.expectMsg(DirectoryScanner.FilesLoaded(0))

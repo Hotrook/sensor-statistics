@@ -25,7 +25,7 @@ class FileProcessor(supervisor: ActorRef, sensorDataStreamer: ActorRef, file: Fi
 
   import FileProcessor._
 
-  override def receive = {
+  override def receive : Receive = {
 
     case LoadFile =>
       log.info("Loading file: {}", file.getName)
