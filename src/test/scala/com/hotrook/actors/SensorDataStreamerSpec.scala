@@ -6,7 +6,7 @@ import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 import scala.language.postfixOps
 
-class SensorDataStreamerSpec() extends TestKit(ActorSystem("DirectoryScannerSpec"))
+class SensorDataStreamerSpec() extends TestKit(ActorSystem("SensorDataStreamerSpec"))
   with Matchers
   with WordSpecLike
   with BeforeAndAfterAll {
@@ -48,7 +48,7 @@ class SensorDataStreamerSpec() extends TestKit(ActorSystem("DirectoryScannerSpec
       testLineProcessing(sensorId, temperature, SensorDataStreamer.SensorData(sensorId, None))
     }
 
-    "send back response when files is proccessed" in {
+    "send back response when files is processed" in {
       val sensorDataStreamer = system.actorOf(SensorDataStreamer.props(dataManager.ref))
       val message = FileProcessor.EndOfFile("test.csv")
       supervisor.send(sensorDataStreamer, message)

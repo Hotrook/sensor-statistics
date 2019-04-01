@@ -13,10 +13,10 @@ object SensorStatisticsSupervisor {
 
 class SensorStatisticsSupervisor( directoryPath: String, printManager: ActorRef) extends Actor with ActorLogging {
 
-  val resultsCollector = context.actorOf(ResultsCollector.props(printManager, this.self))
-  val sensorManager = context.actorOf(SensorManager.props)
-  val sensorDataStreamer = context.actorOf(SensorDataStreamer.props(sensorManager))
-  val directoryScanner = context.actorOf(DirectoryScanner.props(sensorDataStreamer))
+  private val resultsCollector = context.actorOf(ResultsCollector.props(printManager, this.self))
+  private val sensorManager = context.actorOf(SensorManager.props)
+  private val sensorDataStreamer = context.actorOf(SensorDataStreamer.props(sensorManager))
+  private val directoryScanner = context.actorOf(DirectoryScanner.props(sensorDataStreamer))
 
   override def preStart(): Unit = log.info("SensorStatistics app started")
 

@@ -25,13 +25,13 @@ class PrintManager(printer: ActorRef) extends Actor with ActorLogging {
   override def receive: Receive = {
 
     case PrintManager.ProcessedFiles(number) =>
-      printer ! Printer.Print(s"Num of processed files: ${number}")
+      printer ! Printer.Print(s"Num of processed files: $number")
 
     case PrintManager.ProcessedMeasurements(number) =>
-      printer ! Printer.Print(s"Num of processed measurements: ${number}")
+      printer ! Printer.Print(s"Num of processed measurements: $number")
 
     case PrintManager.UnsuccessfulMeasurements(number) =>
-      printer ! Printer.Print(s"Num of failed measurements: ${number}")
+      printer ! Printer.Print(s"Num of failed measurements: $number")
 
     case PrintManager.PrintResults =>
       printer ! Printer.Print("Sensors with highest avg humidity:")
@@ -41,7 +41,7 @@ class PrintManager(printer: ActorRef) extends Actor with ActorLogging {
       val maxToPrint = max.map(_.toString).getOrElse("NaN")
       val minToPrint = min.map(_.toString).getOrElse("NaN")
       val averageToPrint = average.map(_.toString).getOrElse("NaN")
-      printer ! Printer.Print(s"${sensorId},${maxToPrint},${minToPrint},${averageToPrint}")
+      printer ! Printer.Print(s"$sensorId,$maxToPrint,$minToPrint,$averageToPrint")
 
     case msg@ResultsCollector.EndOfData =>
       context watch printer

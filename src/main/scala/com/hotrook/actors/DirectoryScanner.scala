@@ -37,7 +37,7 @@ class DirectoryScanner(sensorDataStreamer: ActorRef) extends Actor with ActorLog
 
       filesProcessors.foreach(_ ! FileProcessor.LoadFile)
 
-      if (files.size == 0) {
+      if (files.isEmpty) {
         sender() ! DirectoryScanner.FilesLoaded(0)
         context stop self
       } else {
@@ -52,7 +52,7 @@ class DirectoryScanner(sensorDataStreamer: ActorRef) extends Actor with ActorLog
       receivedResponse(stillWaiting, fileProcessor, supervisor, size)
   }
 
-  private def receivedResponse(stillWaiting: Set[ActorRef], fileProcessor: ActorRef, supervisor: ActorRef, size: Int) = {
+  private def receivedResponse(stillWaiting: Set[ActorRef], fileProcessor: ActorRef, supervisor: ActorRef, size: Int): Unit = {
     val newStillWaiting = stillWaiting - fileProcessor
 
     if (newStillWaiting.isEmpty) {

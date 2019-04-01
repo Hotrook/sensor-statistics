@@ -1,6 +1,6 @@
 package com.hotrook.actors
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, Cancellable, Props}
 
 import scala.concurrent.duration.FiniteDuration
 
@@ -26,7 +26,7 @@ class SensorQuery(
 
   import context.dispatcher
 
-  val queryTimeoutTimer = context.system.scheduler.scheduleOnce(timeout, self, SensorQuery.CollectionTimeout)
+  val queryTimeoutTimer: Cancellable = context.system.scheduler.scheduleOnce(timeout, self, SensorQuery.CollectionTimeout)
 
   override def preStart(): Unit = {
     sensorIdToActor.valuesIterator.foreach { sensor =>

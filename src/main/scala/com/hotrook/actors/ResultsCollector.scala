@@ -33,7 +33,7 @@ class ResultsCollector(printer: ActorRef, supervisor: ActorRef) extends Actor wi
       context stop self
   }
 
-  private def makeReport() = {
+  private def makeReport(): Unit = {
     context watch printer
 
     val processedMeasurements = results.foldLeft(0)(_ + _.numberOfRequests)
