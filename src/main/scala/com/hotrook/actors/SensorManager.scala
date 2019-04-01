@@ -3,6 +3,7 @@ package com.hotrook.actors
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 
 import scala.collection.mutable.Map
+import scala.concurrent.duration._
 
 object SensorManager {
   def props: Props = Props(new SensorManager)
@@ -22,9 +23,8 @@ class SensorManager extends Actor with ActorLogging {
           sensorIdToActor += sensorId -> newSensor
           newSensor forward trackMsg
       }
-    case trackMsg@SensorDataStreamer.FinishProcessing(_) =>
-      sensorIdToActor.foreach {
-        case (_, sensor) => sensor forward trackMsg
-      }
+    case SensorDataStreamer.FinishProcessing(requester) =>
+      context.actorOf(SensorQuery.props(sensorIdToActor.toMap, requester, 5 seconds))
+
   }
 }

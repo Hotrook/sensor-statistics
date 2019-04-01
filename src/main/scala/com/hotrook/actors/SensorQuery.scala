@@ -8,11 +8,10 @@ object SensorQuery {
 
   def props(
              sensorIdToActor: Map[String, ActorRef],
-             requestId: Long,
              requester: ActorRef,
              timeout: FiniteDuration
            ): Props = {
-    Props(new SensorQuery(sensorIdToActor, requestId, requester, timeout))
+    Props(new SensorQuery(sensorIdToActor, requester, timeout))
   }
 
   case object CollectionTimeout
@@ -21,7 +20,6 @@ object SensorQuery {
 
 class SensorQuery(
                    sensorIdToActor: Map[String, ActorRef],
-                   requestId: Long,
                    requester: ActorRef,
                    timeout: FiniteDuration
                  ) extends Actor with ActorLogging {
@@ -47,7 +45,7 @@ class SensorQuery(
   def waitingForReplies(stillWaiting: Set[ActorRef]): Receive = {
     case trackMsg@Sensor.SensorSummary(_, _, _, _, _, _) =>
       val sensor = sender()
-      requester ! trackMsg
+      requester forward trackMsg
       receivedResponse(sensor, stillWaiting)
 
     case SensorQuery.CollectionTimeout =>

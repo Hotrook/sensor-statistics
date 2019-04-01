@@ -4,14 +4,13 @@ import akka.actor.ActorSystem
 import akka.testkit.{TestKit, TestProbe}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
-import scala.concurrent.duration._
-
 class SensorManagerSpec extends TestKit(ActorSystem("SensorManagerSpec"))
   with Matchers
   with WordSpecLike
   with BeforeAndAfterAll {
 
   val supervisor = TestProbe()
+  val requester = TestProbe()
 
   "SensorManager" should {
     "create 2 actor and forward messages to them" in {
@@ -19,14 +18,15 @@ class SensorManagerSpec extends TestKit(ActorSystem("SensorManagerSpec"))
 
       supervisor.send(sensorManager, SensorDataStreamer.SensorData("sensorId1", None))
       supervisor.send(sensorManager, SensorDataStreamer.SensorData("sensorId2", None))
+      supervisor.send(sensorManager, SensorDataStreamer.FinishProcessing(requester.ref))
 
-      supervisor.send(sensorManager, SensorDataStreamer.FinishProcessing(supervisor.ref))
+      requester.expectMsgClass(Sensor.SensorSummary("sensorId1", None, None, None, 1, 0).getClass)
+      val sender1 = requester.lastSender
 
-      supervisor.expectMsgClass(Sensor.SensorSummary("sensorId1", None, None, None, 1, 0).getClass)
-      val sender1 = supervisor.lastSender
+      requester.expectMsgClass(Sensor.SensorSummary("sensorId2", None, None, None, 1, 0).getClass)
+      val sender2 = requester.lastSender
 
-      supervisor.expectMsgClass(Sensor.SensorSummary("sensorId2", None, None, None, 1, 0).getClass)
-      val sender2 = supervisor.lastSender
+      requester.expectMsg(ResultsCollector.AllCollected)
 
       sensorManager should not equal sender1
       sensorManager should not equal sender2
@@ -40,13 +40,12 @@ class SensorManagerSpec extends TestKit(ActorSystem("SensorManagerSpec"))
       supervisor.send(sensorManager, SensorDataStreamer.SensorData(sensorId, Some(2)))
       supervisor.send(sensorManager, SensorDataStreamer.SensorData(sensorId, None))
 
-      supervisor.send(sensorManager, SensorDataStreamer.FinishProcessing(supervisor.ref))
+      supervisor.send(sensorManager, SensorDataStreamer.FinishProcessing(requester.ref))
 
-      supervisor.expectMsg(Sensor.SensorSummary(sensorId, Some(1), Some(2), Some(2), 2, 1))
+      requester.expectMsg(Sensor.SensorSummary(sensorId, Some(1), Some(2), Some(2), 2, 1))
+      val sender = requester.lastSender
 
-      val sender = supervisor.lastSender
-
-      supervisor.expectNoMessage(1 second)
+      requester.expectMsg(ResultsCollector.AllCollected)
 
       sensorManager should not equal sender
     }
