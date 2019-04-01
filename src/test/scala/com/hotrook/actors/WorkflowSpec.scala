@@ -2,6 +2,7 @@ package com.hotrook.actors
 
 import akka.actor.ActorSystem
 import akka.testkit.{TestKit, TestProbe}
+import com.hotrook.actors.printing.PrintManager
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 import scala.language.postfixOps
@@ -13,6 +14,8 @@ class WorkflowSpec() extends TestKit(ActorSystem("WorkflowSpec"))
 
   val supervisor = TestProbe()
   val sensorId = "sensorId"
+  val directory = "src/test/resources/testDirectories/3-files-dir-example"
+
 
   override def afterAll: Unit = {
     TestKit.shutdownActorSystem(system)
@@ -20,7 +23,6 @@ class WorkflowSpec() extends TestKit(ActorSystem("WorkflowSpec"))
 
   "Workflow" should {
     "work with DirectoryScanner, FileProcessors and SensorDataStreamer" in {
-      val directory = "src/test/resources/testDirectories/3-files-dir-example"
       val dataManager = TestProbe()
       val sensorDataStreamer = system.actorOf(SensorDataStreamer.props(dataManager.ref))
       val directoryScanner = system.actorOf(DirectoryScanner.props(sensorDataStreamer))
@@ -42,7 +44,6 @@ class WorkflowSpec() extends TestKit(ActorSystem("WorkflowSpec"))
     }
 
     "work with DirectoryScanner, FileProcessors, SensorDataStreamer and SensorManager" in {
-      val directory = "src/test/resources/testDirectories/3-files-dir-example"
       val sensorManager = system.actorOf(SensorManager.props)
       val resultCollector = TestProbe()
       val sensorDataStreamer = system.actorOf(SensorDataStreamer.props(sensorManager))
@@ -64,7 +65,6 @@ class WorkflowSpec() extends TestKit(ActorSystem("WorkflowSpec"))
     }
 
     "work with DirectoryScanner, FileProcessors, SensorDataStreamer, SensorManager and ResultCollector" in {
-      val directory = "src/test/resources/testDirectories/3-files-dir-example"
       val printer = TestProbe()
       val sensorManager = system.actorOf(SensorManager.props)
       val resultCollector = system.actorOf(ResultsCollector.props(printer.ref))
@@ -78,12 +78,12 @@ class WorkflowSpec() extends TestKit(ActorSystem("WorkflowSpec"))
       supervisor.expectMsg(DirectoryScanner.FilesLoaded(3))
       supervisor.send(sensorDataStreamer, SensorDataStreamer.FinishProcessing(resultCollector))
 
-      printer.expectMsg(Printer.ProcessedMeasurements(6))
-      printer.expectMsg(Printer.UnsuccessfulMeasurements(0))
-      printer.expectMsg(Printer.PrintResults)
-      printer.expectMsg(Printer.PrintResult("s3", Some(8), Some(9), Some(10)))
-      printer.expectMsg(Printer.PrintResult("s1", Some(2), Some(7), Some(12)))
-      printer.expectMsg(Printer.PrintResult("s2", Some(4), Some(5), Some(6)))
+      printer.expectMsg(PrintManager.ProcessedMeasurements(6))
+      printer.expectMsg(PrintManager.UnsuccessfulMeasurements(0))
+      printer.expectMsg(PrintManager.PrintResults)
+      printer.expectMsg(PrintManager.PrintResult("s3", Some(8), Some(9), Some(10)))
+      printer.expectMsg(PrintManager.PrintResult("s1", Some(2), Some(7), Some(12)))
+      printer.expectMsg(PrintManager.PrintResult("s2", Some(4), Some(5), Some(6)))
     }
   }
 
