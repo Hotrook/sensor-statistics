@@ -23,11 +23,10 @@ class FileProcessorSpec() extends TestKit(ActorSystem("FileProcessorSpec"))
     "correctly process csv file" in {
       val supervisor = TestProbe()
       val sensorDataStreamer = TestProbe()
-      val fileProcessor = system.actorOf(FileProcessor.props(supervisor.ref, sensorDataStreamer.ref))
-
       val file = new File("src/test/resources/example.csv")
+      val fileProcessor = system.actorOf(FileProcessor.props(supervisor.ref, sensorDataStreamer.ref, file))
 
-      supervisor.send(fileProcessor, FileProcessor.LoadFile(file))
+      supervisor.send(fileProcessor, FileProcessor.LoadFile)
 
       sensorDataStreamer.expectMsg(SensorDataStreamer.ProcessLine("sensorId1,100"))
       sensorDataStreamer.expectMsg(SensorDataStreamer.ProcessLine("sensorId2,200"))
