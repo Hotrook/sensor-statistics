@@ -1,6 +1,7 @@
 package com.hotrook.actors.printing
 
-import akka.actor.{ Actor, Props, ActorLogging }
+import akka.actor.{Actor, ActorLogging, Props}
+import com.hotrook.actors.ResultsCollector
 
 object Printer {
   def props: Props = Props(new Printer)
@@ -11,5 +12,6 @@ object Printer {
 class Printer extends Actor with ActorLogging {
   override def receive : Receive = {
     case Printer.Print(text) => println(text)
+    case ResultsCollector.EndOfData => context stop self
   }
 }
