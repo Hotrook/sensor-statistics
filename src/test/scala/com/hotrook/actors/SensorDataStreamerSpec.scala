@@ -47,6 +47,13 @@ class SensorDataStreamerSpec() extends TestKit(ActorSystem("DirectoryScannerSpec
 
       testLineProcessing(sensorId, temperature, SensorDataStreamer.SensorData(sensorId, None))
     }
+
+    "send back response when files is proccessed" in {
+      val sensorDataStreamer = system.actorOf(SensorDataStreamer.props(dataManager.ref))
+      val message = FileProcessor.EndOfFile("test.csv")
+      supervisor.send(sensorDataStreamer, message)
+      supervisor.expectMsg(message)
+    }
   }
 
   private def testLineProcessing(sensorId: String, temperature: String, expectedResult: SensorDataStreamer.SensorData) = {

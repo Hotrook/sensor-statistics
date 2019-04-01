@@ -20,12 +20,15 @@ class SensorDataStreamer(dataManager: ActorRef) extends Actor with ActorLogging 
 
   import SensorDataStreamer._
 
-  override def receive = {
+  override def receive : Receive = {
     case ProcessLine(line) =>
       val sensorData = processLine(line)
       dataManager ! sensorData
     case trackMsg@FinishProcessing(_) =>
       dataManager forward trackMsg
+    case trackMsg@FileProcessor.EndOfFile(_) =>
+      sender() ! trackMsg
+
   }
 
   private def processLine(line: String) = {
