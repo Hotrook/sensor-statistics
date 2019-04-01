@@ -28,7 +28,7 @@ class SensorQuerySpec() extends TestKit(ActorSystem("SensorQuerySpec"))
         "sensorId1" -> sensor1.ref,
         "sensorId2" -> sensor2.ref
       )
-      system.actorOf(SensorQuery.props(sensorIdToActorRef, 1, requester.ref, 2 seconds))
+      system.actorOf(SensorQuery.props(sensorIdToActorRef, requester.ref, 2 seconds))
       val firstReply = Sensor.SensorSummary("sensorId1", None, None, None, 0, 0)
       val secondReply = Sensor.SensorSummary("sensorId2", None, None, None, 0, 0)
 
@@ -52,7 +52,7 @@ class SensorQuerySpec() extends TestKit(ActorSystem("SensorQuerySpec"))
       "sensorId2" -> TestProbe().ref
     )
 
-    system.actorOf(SensorQuery.props(sensorIdToActorRef, 1, requester.ref, 2 seconds))
+    system.actorOf(SensorQuery.props(sensorIdToActorRef, requester.ref, 2 seconds))
     val reply = Sensor.SensorSummary("sensorId1", None, None, None, 0, 0)
 
     sensor.expectMsg(SensorDataStreamer.FinishProcessing(requester.ref))
