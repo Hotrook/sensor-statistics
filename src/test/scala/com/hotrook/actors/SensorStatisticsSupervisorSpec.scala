@@ -25,6 +25,7 @@ class SensorStatisticsSupervisorSpec() extends TestKit(ActorSystem("SensorStatis
       val printManager = TestProbe()
       val directoryPath = "src/test/resources/testDirectories/3-files-dir-example"
       val supervisor = system.actorOf(SensorStatisticsSupervisor.props(directoryPath, printManager.ref))
+      val watcher = TestProbe()
 
       supervisor ! SensorStatisticsSupervisor.Start
 
@@ -36,9 +37,10 @@ class SensorStatisticsSupervisorSpec() extends TestKit(ActorSystem("SensorStatis
       printManager.expectMsg(PrintManager.PrintResult("s1", Some(2), Some(7), Some(12)))
       printManager.expectMsg(PrintManager.PrintResult("s2", Some(4), Some(5), Some(6)))
       printManager.expectMsg(ResultsCollector.EndOfData)
-      printManager.ref ! PoisonPill
 
-      system.whenTerminated
+      watcher.watch(supervisor)
+      printManager.ref ! PoisonPill
+      watcher.expectTerminated(supervisor)
     }
   }
 }

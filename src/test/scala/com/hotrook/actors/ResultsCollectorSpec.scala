@@ -1,6 +1,6 @@
 package com.hotrook.actors
 
-import akka.actor.ActorSystem
+import akka.actor.{ActorSystem, PoisonPill}
 import akka.testkit.{TestKit, TestProbe}
 import com.hotrook.actors.printing.PrintManager
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
@@ -41,6 +41,11 @@ class ResultsCollectorSpec() extends TestKit(ActorSystem("ResultsCollectorSpec")
       printer.expectMsg(PrintManager.PrintResult("s4", Some(0), Some(1), Some(2)))
       printer.expectMsg(PrintManager.PrintResult("s5", None, None, None))
       printer.expectMsg(ResultsCollector.EndOfData)
+
+      supervisor.watch(resultsCollector)
+      printer.ref ! PoisonPill
+      supervisor.expectMsg(SensorStatisticsSupervisor.Stop)
+      supervisor.expectTerminated(resultsCollector)
     }
 
     "not crash if 0 summaries submitted" in {
