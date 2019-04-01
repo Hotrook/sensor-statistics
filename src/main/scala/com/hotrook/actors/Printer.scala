@@ -23,20 +23,15 @@ object Printer {
 class Printer extends Actor with ActorLogging {
   override def receive: Receive = {
     case Printer.ProcessedFiles(number) =>
-      println("Num of processed files: {}", number)
+      println(s"Num of processed files: ${number}")
     case Printer.ProcessedMeasurements(number) =>
-      println("Num of processed measurements: {}", number)
+      println(s"Num of processed measurements: ${number}")
     case Printer.UnsuccessfulMeasurements(number) =>
-      println("Num of failed measurements: {}", number)
+      println(s"Num of failed measurements: ${number}")
     case Printer.PrintResult =>
-      println("sensor-id,min,avg,max")
+      println(s"sensor-id,min,avg,max")
     case Printer.PrintResult(sensorId, max, average, min) =>
-      println("{},{},{},{}",
-        sensorId,
-        max.map(_.toString).getOrElse("NaN"),
-        average.map(_.toString).getOrElse("NaN"),
-        min.map(_.toString).getOrElse("NaN")
-      )
+      println(s"${sensorId},${max.map(_.toString).getOrElse("NaN")},${average.map(_.toString).getOrElse("NaN")},${min.map(_.toString).getOrElse("NaN")}")
 
   }
 }
