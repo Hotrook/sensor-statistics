@@ -26,8 +26,10 @@ class Sensor(sensorId: String) extends Actor with ActorLogging {
   override def receive: Receive = waitingForMeasurements(State(None, None, None, 0, 0))
 
   private def waitingForMeasurements(state: State): Receive = {
+
     case SensorDataStreamer.SensorData(`sensorId`, temperature) =>
       saveRecord(temperature, state)
+
     case FinishProcessing(_) =>
       sender ! createSummaryMessage(state)
       context stop self

@@ -15,6 +15,7 @@ class SensorManager extends Actor with ActorLogging {
   val sensorIdToActor = mutable.Map.empty[String, ActorRef]
 
   override def receive: Receive = {
+
     case trackMsg@SensorDataStreamer.SensorData(sensorId, _) =>
       sensorIdToActor.get(sensorId) match {
         case Some(sensor) =>
@@ -24,8 +25,8 @@ class SensorManager extends Actor with ActorLogging {
           sensorIdToActor += sensorId -> newSensor
           newSensor forward trackMsg
       }
+
     case SensorDataStreamer.FinishProcessing(requester) =>
       context.actorOf(SensorQuery.props(sensorIdToActor.toMap, requester, 5 seconds))
-
   }
 }
