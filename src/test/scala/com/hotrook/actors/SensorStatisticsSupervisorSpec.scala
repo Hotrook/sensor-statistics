@@ -38,9 +38,7 @@ class SensorStatisticsSupervisorSpec() extends TestKit(ActorSystem("SensorStatis
       printManager.expectMsg(PrintManager.PrintResult("s2", Some(4), Some(5), Some(6)))
       printManager.expectMsg(ResultsCollector.EndOfData)
 
-      watcher.watch(supervisor)
       printManager.ref ! PoisonPill
-      watcher.expectTerminated(supervisor)
     }
   }
 }
